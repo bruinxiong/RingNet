@@ -12,16 +12,24 @@ CVPR 2019
 
 More details on our NoW benchmark dataset, 3D face reconstruction challenge can be found in our [project page](https://ringnet.is.tue.mpg.de). A pdf preprint is also available on the [project page](https://ringnet.is.tue.mpg.de).
 
+* **Update**: We have released the **evaluation code for NoW Benchmark challenge** [here](https://github.com/soubhiksanyal/now_evaluation).
+
+* **Update**: Add demo to build a texture for the reconstructed mesh from the input image.
+
+* **Update**: NoW Dataset is divided into Test set and Validation Set. **Ground Truth scans** are available for the Validation Set. Please Check our [project page](https://ringnet.is.tue.mpg.de) for more details.
+
+* **Update**: We have released a **PyTorch implementation of the decoder FLAME with dynamic conture loading** which can be directly used for training networks. Please check [FLAME_PyTorch](https://github.com/soubhiksanyal/FLAME_PyTorch) for the code.
 
 ## Installation
 
-The code uses Python 2.7 and it is tested on Tensorflow gpu version 1.12.0, with CUDA-9.0 and cuDNN-7.3.
+The code uses **Python 2.7** and it is tested on Tensorflow gpu version 1.12.0, with CUDA-9.0 and cuDNN-7.3.
 
 ### Setup RingNet Virtual Environment
 
 ```
 virtualenv --no-site-packages <your_home_dir>/.virtualenvs/RingNet
 source <your_home_dir>/.virtualenvs/RingNet/bin/activate
+pip install --upgrade pip==19.1.1
 ```
 ### Clone the project and install requirements
 
@@ -32,13 +40,16 @@ pip install -r requirements.txt
 pip install opendr==0.77
 mkdir model
 ```
-Install mesh processing libraries from [MPI-IS/mesh](https://github.com/MPI-IS/mesh).
+Install mesh processing libraries from [MPI-IS/mesh](https://github.com/MPI-IS/mesh). (This now only works with python 3, so donot install it)
+
+* Update: Please install the following [fork](https://github.com/TimoBolkart/mesh) for working with the mesh processing libraries with python 2.7 
 
 ## Download models
 
 * Download pretrained RingNet weights from the [project website](https://ringnet.is.tue.mpg.de), downloads page. Copy this inside the **model** folder
-* Download FLAME model from [here](http://flame.is.tue.mpg.de/). Copy it inside the **flame_model** folder. This step is optional and only required if you want to use the output Flame parameters to play with the 3D mesh,i.e., to neutralize the pose and
+* Download FLAME 2019 model from [here](http://flame.is.tue.mpg.de/). Copy it inside the **flame_model** folder. This step is optional and only required if you want to use the output Flame parameters to play with the 3D mesh, i.e., to neutralize the pose and
 expression and only using the shape as a template for other methods like [VOCA (Voice Operated Character Animation)](https://github.com/TimoBolkart/voca).
+* Download the [FLAME_texture_data](http://files.is.tue.mpg.de/tbolkart/FLAME/FLAME_texture_data.zip) and unpack this into the **flame_model** folder.
 
 ## Demo
 
@@ -59,6 +70,14 @@ If you want the output mesh then run the following command
 python -m demo --img_path ./input_images/000001.jpg --out_folder ./RingNet_output --save_obj_file=True
 ```
 It will save a *.obj file of the predicted mesh in **./RingNet_output/mesh/**.
+
+#### Output textured mesh
+
+If you want the output the predicted mesh with the image projected onto the mesh as texture then run the following command
+```
+python -m demo --img_path ./input_images/000001.jpg --out_folder ./RingNet_output --save_texture=True
+```
+It will save a *.obj, *.mtl, and *.png file of the predicted mesh in **./RingNet_output/texture/**.
 
 #### Output FLAME and camera parameters
 
@@ -99,5 +118,6 @@ If you have any questions you can contact us at soubhik.sanyal@tuebingen.mpg.de 
 
 ## Acknowledgement
 
+* We thank [Ahmed Osman](https://github.com/ahmedosman) for his support in the tensorflow implementation of FLAME.
 * We thank Raffi Enficiaud and Ahmed Osman for pushing the release of psbody.mesh.
 * We thank Benjamin Pellkofer and Jonathan Williams for helping with our [RingNet project website](https://ringnet.is.tue.mpg.de).

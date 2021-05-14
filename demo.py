@@ -47,6 +47,7 @@ from smpl_webuser.serialization import load_model
 
 from util import renderer as vis_util
 from util import image as img_util
+from util.project_on_mesh import compute_texture_map
 from config_test import get_config
 from run_RingNet import RingNet_inference
 
@@ -89,6 +90,14 @@ def visualize(img, proc_param, verts, cam, img_name='test_image'):
     fig.savefig(img_name + '.png')
     # import ipdb
     # ipdb.set_trace()
+
+
+def create_texture(img, proc_param, verts, faces, cam, texture_data):
+    cam_for_render, vert_shifted = vis_util.get_original(proc_param, verts, cam, img_size=img.shape[:2])
+
+    texture_map = compute_texture_map(img, vert_shifted, faces, cam_for_render, texture_data)
+    return texture_map
+
 
 def preprocess_image(img_path):
     img = io.imread(img_path)
@@ -139,6 +148,22 @@ def main(config, template_mesh):
         neutral_mesh = make_prdicted_mesh_neutral(config.out_folder + '/params/' + config.img_path.split('/')[-1][:-4] + '.npy', config.flame_model_path)
         neutral_mesh.write_obj(config.out_folder + '/neutral_mesh/' + config.img_path.split('/')[-1][:-4] + '.obj')
 
+    if config.save_texture:
+        if not os.path.exists(config.flame_texture_data_path):
+            print('FLAME texture data not found')
+            return
+        texture_data = np.load(config.flame_texture_data_path, allow_pickle=True)[()]
+        texture = create_texture(img, proc_param, vertices[0], template_mesh.f, cams, texture_data)
+
+        if not os.path.exists(config.out_folder + '/texture'):
+            os.mkdir(config.out_folder + '/texture')
+
+        cv2.imwrite(config.out_folder + '/texture/' + config.img_path.split('/')[-1][:-4] + '.png', texture[:,:,::-1])
+        mesh = Mesh(v=vertices[0], f=template_mesh.f)
+        mesh.vt = texture_data['vt']
+        mesh.ft = texture_data['ft']
+        mesh.set_texture_image(config.out_folder + '/texture/' + config.img_path.split('/')[-1][:-4] + '.png')
+        mesh.write_obj(config.out_folder + '/texture/' + config.img_path.split('/')[-1][:-4] + '.obj')
 
 
 
